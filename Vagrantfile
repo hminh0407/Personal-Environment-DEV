@@ -22,7 +22,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     general_dev.vm.synced_folder ".", "/srv/general/dev/"    
     # makes dev logs accessible from everywhere
     # general_dev.vm.synced_folder "tmp", "/tmp/scratch"
-    general_dev.vm.provision "shell", run: "always", path: "./bootstrap.sh"
+    # privileged: false to run provision script as a default user instead of root
+    general_dev.vm.provision "shell", path: "./bootstrap.sh", privileged: false
 
   end
 end
