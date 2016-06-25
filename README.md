@@ -21,7 +21,7 @@ Example of using vagrant and docker to setup a dev environment
 
 ## Components
 
-### MySQL - Percona Serv
+### MySQL - Percona Server
 
 ### RabbitMQ
 
