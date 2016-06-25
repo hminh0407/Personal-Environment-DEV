@@ -16,14 +16,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       v.memory = 1024
       v.cpus = 1
     end
-    general_dev.vm.network "private_network", ip: "192.168.50.30"
+    general_dev.vm.network "private_network", ip: "192.168.50.10"
+    # Add the ports need to be forwarded
     general_dev.vm.network "forwarded_port", guest: 22, host: 20230 # SSH
-    general_dev.vm.network "forwarded_port", guest: 3306, host: 53306 # Mysql
-    general_dev.vm.synced_folder ".", "/srv/general/dev/"    
+    general_dev.vm.network "forwarded_port", guest: 3306, host: 3306 # Mysql
+    general_dev.vm.network "forwarded_port", guest: 5672, host: 5672 # RabbitMQ
+    general_dev.vm.network "forwarded_port", guest: 15672, host: 15672 # RabbitMQ Admin
+    general_dev.vm.network "forwarded_port", guest: 6379, host: 6379 # Redis
+    general_dev.vm.synced_folder ".", "/srv/general/dev/"
     # makes dev logs accessible from everywhere
-    # general_dev.vm.synced_folder "tmp", "/tmp/scratch"
-    # privileged: false to run provision script as a default user instead of root
-    general_dev.vm.provision "shell", path: "./bootstrap.sh", privileged: false
+    # general_dev.vm.synced_folder "tmp", "/tmp/scratch"    
+    general_dev.vm.provision "shell", path: "./bootstrap.sh"
 
   end
 end
