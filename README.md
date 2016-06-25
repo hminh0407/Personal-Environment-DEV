@@ -19,10 +19,10 @@ Example of using vagrant and docker to setup a dev environment
 - To enter a running container: docker exec -it {container-name} /bin/bash
 - To safely quit docker container: ctrl + p + q
 
-### Components
+## Components
 
-## MySQL - Percona Serv
+### MySQL - Percona Server
 
-## RabbitMQ
+### RabbitMQ
 
-## Redis
+### Redis
