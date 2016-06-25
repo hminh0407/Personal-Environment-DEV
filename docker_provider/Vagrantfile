@@ -1,0 +1,57 @@
+VAGRANTFILE_API_VERSION = "2"
+ENV['VAGRANT_DEFAULT_PROVIDER'] = 'docker'
+DOCKER_HOST_VAGRANTFILE = "./docker_provider/DockerHostVagrantfile"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|  
+
+  # MySQL - Percona container
+  # To run: vagrant up mysql
+  # To enter a running container: docker exec -it mysql /bin/bash
+  config.vm.define 'mysql' do |m|
+    m.vm.provider :docker do |d|
+      d.image = 'percona'
+      d.name = 'mysql'
+      d.ports = ['3306:3306']
+      d.create_args = ['-h', 'mysql'] # Additional arguments to pass to docker run when the container is started.
+      d.env    = {
+        'MYSQL_ROOT_PASSWORD' => 'root'
+      }
+      d.remains_running = true
+      d.vagrant_vagrantfile = "#{DOCKER_HOST_VAGRANTFILE}"
+    end
+  end
+
+  # RabbitMq Container
+  # To run: vagrant up rabbitmq
+  # To enter a running container: docker exec -it rabbitmq /bin/bash
+  config.vm.define 'rabbitmq' do |m|
+    m.vm.provider :docker do |d|
+      d.image = 'rabbitmq:3-management' # RabbitMQ container with management plugin enable as default
+      d.name = 'rabbitmq'
+      d.ports = ['5672:5672', '15672:15672']
+      d.create_args = ['-h', 'rabbitmq']
+      d.env = {
+        'RABBITMQ_DEFAULT_USER' => 'guest',
+        'RABBITMQ_DEFAULT_PASS' => 'guest'
+      }
+      d.remains_running = true
+      d.vagrant_vagrantfile = "#{DOCKER_HOST_VAGRANTFILE}"
+      #d.cmd = ['rabbitmq-plugins', 'enable', 'rabbitmq_management'] -> have not found a way to make this work yet
+    end    
+  end
+
+  # Redis Container
+  # To run: vagrant up redis
+  # To enter a running container: docker exec -it redis /bin/bash
+  config.vm.define 'redis' do |m|
+    m.vm.provider :docker do |d|
+      d.image = 'redis'
+      d.name = 'redis'
+      d.ports = ['6379:6379']
+      d.create_args = ['-h', 'rabbitmq']      
+      d.remains_running = true
+      d.vagrant_vagrantfile = "#{DOCKER_HOST_VAGRANTFILE}"      
+    end    
+  end
+
+end
