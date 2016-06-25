@@ -1,0 +1,33 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+DOCKER_HOST_NAME = "dockerhost"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  # All Vagrant configuration is done here.
+  # Every Vagrant virtual environment requires a box to build off of.
+
+  config.vm.provision "docker"
+  # The following line terminates all ssh connections. Therefore
+  # Vagrant will be forced to reconnect.
+  # That's a workaround to have the docker command in the PATH
+  config.vm.provision "shell", inline:
+    "ps aux | grep 'sshd:' | awk '{print $2}' | xargs kill"
+
+  config.vm.define "dockerhost"
+  #config.vm.box = "phusion/baseimage:14.04"
+  config.vm.box = "ubuntu/ubuntu-15.04-snappy-core-stable"
+  
+  # Network config
+  general_dev.vm.network "private_network", ip: "192.168.50.10"
+  general_dev.vm.network "forwarded_port", guest: 22, host: 20230 # SSH
+  general_dev.vm.network "forwarded_port", guest: 3306, host: 3306 # Mysql
+  general_dev.vm.network "forwarded_port", guest: 5672, host: 5672 # RabbitMQ
+  general_dev.vm.network "forwarded_port", guest: 15672, host: 15672 # RabbitMQ Admin
+  general_dev.vm.network "forwarded_port", guest: 6379, host: 6379 # Redis
+
+  config.vm.provider :virtualbox do |vb|
+      vb.name = "#{DOCKER_HOST_NAME}"
+  end
+end
