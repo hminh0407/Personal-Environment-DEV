@@ -1,12 +1,13 @@
 VAGRANTFILE_API_VERSION = "2"
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'docker'
+DOCKER_HOST_FOLDER = "./docker_provider"
 DOCKER_HOST_VAGRANTFILE = "./docker_provider/DockerHostVagrantfile"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|  
 
   # MySQL - Percona container
   # To run: vagrant up mysql
-  # To enter a running container: docker exec -it mysql /bin/bash
+  # To enter a running container: docker exec -it mysql bash
   config.vm.define 'mysql' do |m|
     m.vm.provider :docker do |d|
       d.image = 'percona'
@@ -21,9 +22,31 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
 
+  # Postgres
+  # To run: vagrant up postgres
+  # To enter a running container: docker exec -it postgres bash
+  config.vm.define 'postgres' do |m|
+    m.vm.provider :docker do |d|
+      d.image = 'postgres'
+      d.name = 'postgres'
+      d.ports = ['5432:5432']
+      d.create_args = ['-h', 'postgres'] # Additional arguments to pass to docker run when the container is started.
+      d.env    = {
+        'POSTGRES_USER' => 'root',
+        'POSTGRES_PASSWORD' => 'root'
+      }
+      # Store data on host file system to avoid losing data when removing container
+      d.volumes = ["/var/vagrant/data:/var/lib/postgresql/data"]
+      d.remains_running = true
+      d.vagrant_vagrantfile = "#{DOCKER_HOST_VAGRANTFILE}"
+    end
+    # run shell provision after container started
+    config.vm.provision "shell", path: "#{DOCKER_HOST_FOLDER}/postgres/postgres.sh"
+  end
+
   # RabbitMq Container
   # To run: vagrant up rabbitmq
-  # To enter a running container: docker exec -it rabbitmq /bin/bash
+  # To enter a running container: docker exec -it rabbitmq bash
   config.vm.define 'rabbitmq' do |m|
     m.vm.provider :docker do |d|
       d.image = 'rabbitmq:3-management' # RabbitMQ container with management plugin enable as default
@@ -42,7 +65,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Redis Container
   # To run: vagrant up redis
-  # To enter a running container: docker exec -it redis /bin/bash
+  # To enter a running container: docker exec -it redis bash
   config.vm.define 'redis' do |m|
     m.vm.provider :docker do |d|
       d.image = 'redis'
