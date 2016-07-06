@@ -4,6 +4,8 @@
 VAGRANTFILE_API_VERSION = "2"
 DOCKER_HOST_NAME = "dockerhost"
 
+# Todo:
+# 1. vb machine name is still 'default'. Should find a way for it to take the configured name DOCKER_HOST_NAME
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # All Vagrant configuration is done here.
   # Every Vagrant virtual environment requires a box to build off of.
@@ -14,18 +16,20 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # That's a workaround to have the docker command in the PATH
   config.vm.provision "shell", inline:
     "ps aux | grep 'sshd:' | awk '{print $2}' | xargs kill"
-
-  config.vm.define "dockerhost"
-  #config.vm.box = "phusion/baseimage:14.04"
-  config.vm.box = "ubuntu/ubuntu-15.04-snappy-core-stable"
+  
+  # http://phusion.github.io/baseimage-docker/
+  config.vm.box = "phusion/ubuntu-14.04-amd64"
   
   # Network config
-  general_dev.vm.network "private_network", ip: "192.168.50.10"
-  general_dev.vm.network "forwarded_port", guest: 22, host: 20230 # SSH
-  general_dev.vm.network "forwarded_port", guest: 3306, host: 3306 # Mysql
-  general_dev.vm.network "forwarded_port", guest: 5672, host: 5672 # RabbitMQ
-  general_dev.vm.network "forwarded_port", guest: 15672, host: 15672 # RabbitMQ Admin
-  general_dev.vm.network "forwarded_port", guest: 6379, host: 6379 # Redis
+  config.vm.network "private_network", ip: "192.168.50.10"
+  config.vm.network "forwarded_port", guest: 22, host: 20230 # SSH
+
+  # Uncomment the necessary ports. Make sure that the ports are not beeing used
+  #config.vm.network "forwarded_port", guest: 3306, host: 3306 # Mysql
+  #config.vm.network "forwarded_port", guest: 5672, host: 5672 # RabbitMQ
+  #config.vm.network "forwarded_port", guest: 15672, host: 15672 # RabbitMQ Admin
+  #config.vm.network "forwarded_port", guest: 6379, host: 6379 # Redis
+  #config.vm.network "forwarded_port", guest: 5432, host: 5432 # Postgres
 
   config.vm.provider :virtualbox do |vb|
       vb.name = "#{DOCKER_HOST_NAME}"
